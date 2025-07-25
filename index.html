@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Usage Questionnaire - Carbon Estimator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2em; background: #f5f5f5; max-width: 600px; margin: auto; }
+    h1 { color: #00b894; }
+    label { display: block; margin-top: 1.2em; font-weight: bold; }
+    select, input[type=number] { width: 100%; padding: 0.5em; margin-top: 0.3em; border-radius: 5px; border: 1px solid #ccc; }
+    .card { background: white; padding: 1.5em; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 1.5em; }
+    button { margin-top: 1.5em; padding: 0.7em 1.2em; background-color: #00b894; color: white; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; }
+    .result { font-weight: bold; color: #2d3436; margin-top: 1.5em; }
+  </style>
+</head>
+<body>
+  <h1>AI Usage Carbon Estimator</h1>
+  <p>This tool estimates your monthly AI-related carbon footprint based on a few simple questions. All processing is local and private.</p>
+
+  <div class="card">
+    <form id="usageForm">
+      <label for="chatgpt">How much do you use ChatGPT or similar tools?</label>
+      <select id="chatgpt">
+        <option value="0">Rarely (few times a week)</option>
+        <option value="10">~30 min/day</option>
+        <option value="20">~1 hour/day</option>
+        <option value="40">~2 hours/day</option>
+        <option value="60">~4 hours/day</option>
+        <option value="80">~6 hours/day</option>
+        <option value="100">~8+ hours/day</option>
+      </select>
+
+      <label for="imagegen">Do you use image-generation tools (e.g., DALL·E, Midjourney)?</label>
+      <select id="imagegen">
+        <option value="0">Never</option>
+        <option value="30">Light (~10 images/day)</option>
+        <option value="60">Moderate (~20 images/day)</option>
+        <option value="90">Heavy (~40 images/day)</option>
+        <option value="120">Intensive (~60+ images/day)</option>
+      </select>
+
+      <label for="codeai">Do you use AI coding tools (e.g., Copilot)?</label>
+      <select id="codeai">
+        <option value="0">Never</option>
+        <option value="15">~1 hour/day</option>
+        <option value="30">~2 hours/day</option>
+        <option value="60">~4 hours/day</option>
+        <option value="90">~6 hours/day</option>
+        <option value="120">~8+ hours/day</option>
+      </select>
+
+      <button type="submit">Estimate My CO₂e</button>
+    </form>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    document.getElementById('usageForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const chatgpt = parseFloat(document.getElementById('chatgpt').value);
+      const imagegen = parseFloat(document.getElementById('imagegen').value);
+      const codeai = parseFloat(document.getElementById('codeai').value);
+
+      const totalKwh = chatgpt + imagegen + codeai;
+      const co2 = totalKwh * 0.4;
+      const tonnes = co2 / 1000;
+      const cost = tonnes * 20;
+
+      let tier = "Lite";
+      if (tonnes > 0.75) tier = "Power User";
+      else if (tonnes > 0.25) tier = "Standard";
+
+      document.getElementById('result').innerHTML =
+        `📊 Estimated monthly usage: <strong>${totalKwh.toFixed(1)} kWh</strong><br>` +
+        `🌍 CO₂e: <strong>${tonnes.toFixed(3)} tonnes</strong><br>` +
+        `💵 Offset cost (@ $20/tonne): <strong>$${cost.toFixed(2)}</strong><br><br>` +
+        `🪧 Suggested Plan: <strong>${tier} Offset</strong>`;
+    });
+  </script>
+</body>
+</html>
