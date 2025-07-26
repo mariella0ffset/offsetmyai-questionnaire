@@ -1,104 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Usage Carbon Estimator (GPT-4)</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Usage CO₂ Estimator</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 2em; background: #f5f5f5; max-width: 600px; margin: auto; }
-    h1 { color: #00b894; }
-    label { display: block; margin-top: 1.2em; font-weight: bold; }
-    select, input[type=number] { width: 100%; padding: 0.5em; margin-top: 0.3em; border-radius: 5px; border: 1px solid #ccc; }
-    .card { background: white; padding: 1.5em; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 1.5em; }
-    button { margin-top: 1.5em; padding: 0.7em 1.2em; background-color: #00b894; color: white; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; }
-    .result { font-weight: bold; color: #2d3436; margin-top: 1.5em; }
-    .note { font-size: 0.9em; color: #555; margin-top: 1em; }
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    h1 { color: teal; }
+    label { display: block; margin-top: 1em; font-weight: bold; }
+    select, button { padding: 0.5em; margin-top: 0.5em; width: 100%; }
+    .result { background: #f8f8f8; padding: 1em; margin-top: 1em; border-radius: 6px; }
   </style>
 </head>
 <body>
-  <h1>AI Usage Carbon Estimator</h1>
-  <p>This tool estimates your annual AI-related carbon footprint based on GPT-4 level usage. All processing is local and private.</p>
+  <h1>ChatGPT Usage Carbon Estimator</h1>
+  <p>This tool analyzes your AI usage to estimate your <strong>monthly</strong> carbon footprint.</p>
 
-  <div class="card">
-    <form id="usageForm">
-      <label for="chatgpt">How much do you use GPT-4 (ChatGPT Pro or similar)?</label>
-      <select id="chatgpt">
-        <option value="30">Light (~10 prompts/day)</option>
-        <option value="90">Moderate (~30 prompts/day)</option>
-        <option value="300">Heavy (~100 prompts/day)</option>
-      </select>
+  <label for="chatgpt">How much do you use GPT-4 (ChatGPT Pro or similar)?</label>
+  <select id="chatgpt">
+    <option value="0">Never</option>
+    <option value="30">~10 prompts/day</option>
+    <option value="90">~30 prompts/day</option>
+    <option value="300">~100 prompts/day</option>
+  </select>
 
-      <label for="imagegen">Do you use image-generation tools (e.g., DALL·E, Midjourney)?</label>
-      <select id="imagegen">
-        <option value="0">Never</option>
-        <option value="60">Light (~10 images/day)</option>
-        <option value="120">Moderate (~20 images/day)</option>
-        <option value="240">Heavy (~40 images/day)</option>
-        <option value="360">Intensive (~60+ images/day)</option>
-      </select>
+  <label for="imagegen">Do you use image-generation tools (e.g., DALL·E, Midjourney)?</label>
+  <select id="imagegen">
+    <option value="0">Never</option>
+    <option value="60">~10 images/day</option>
+    <option value="120">~20 images/day</option>
+    <option value="240">~40 images/day</option>
+    <option value="360">~60+ images/day</option>
+  </select>
 
-      <label for="codeai">Do you use AI coding tools (e.g., Copilot)?</label>
-      <select id="codeai">
-        <option value="0">Never</option>
-        <option value="60">~1 hour/day</option>
-        <option value="120">~2 hours/day</option>
-        <option value="180">~4 hours/day</option>
-        <option value="240">~6 hours/day</option>
-        <option value="300">~8+ hours/day</option>
-      </select>
+  <label for="codeai">Do you use AI coding tools (e.g., Copilot)?</label>
+  <select id="codeai">
+    <option value="0">Never</option>
+    <option value="60">1 hr/day</option>
+    <option value="120">2 hrs/day</option>
+    <option value="180">4 hrs/day</option>
+    <option value="240">6 hrs/day</option>
+    <option value="300">8 hrs/day</option>
+  </select>
 
-      <button type="submit">Estimate My CO₂e</button>
-    </form>
+  <button onclick="estimateImpact()">Estimate My CO₂e</button>
 
-    <div id="result" class="result"></div>
-    <div class="note">* Based on GPT-4 prompt energy use (30–300 kWh/month depending on intensity).</div>
-  </div>
+  <div id="output" class="result"></div>
 
   <script>
-    document.getElementById('usageForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-
+    function estimateImpact() {
       const chatgpt = parseFloat(document.getElementById('chatgpt').value);
       const imagegen = parseFloat(document.getElementById('imagegen').value);
       const codeai = parseFloat(document.getElementById('codeai').value);
 
-      const monthlyKwh = chatgpt + imagegen + codeai;
-      const totalKwh = monthlyKwh * 12;
+      const totalKwh = chatgpt + imagegen + codeai;
       const co2 = totalKwh * 0.4;
-      const tonnes = co2 / 1000;
-      const gasGallons = co2 / 8.89;
+      const co2Tonnes = (co2 / 1000).toFixed(3);
+      const gasGallons = (co2 / 8.89).toFixed(1);
+      const homeEquiv = (totalKwh / 900).toFixed(1); // avg monthly use of a medium home
 
-      let tier = "Lite";
-      let clientPrice = 25;
-      let impact = "- Driving ~650 miles<br>- Charging 30,000 smartphones<br>- Growing 1 tree for 10 years";
-      let homeUsage = "about the same as a small apartment";
-
-      if (tonnes > 0.75 && tonnes <= 1.5) {
-        tier = "Power User";
-        clientPrice = 115;
-        impact = "- One-way flight to London<br>- Driving ~4,000 miles<br>- Charging 180,000 smartphones";
-        homeUsage = "similar to a medium-sized home in the Midwest";
-      } else if (tonnes > 0.25 && tonnes <= 0.75) {
-        tier = "Standard";
-        clientPrice = 65;
-        impact = "- 1 roundtrip flight NYC ↔ Chicago<br>- Driving ~2,000 miles<br>- Growing 3 trees for 10 years";
-        homeUsage = "equivalent to a small home or apartment";
-      } else if (tonnes > 1.5) {
-        tier = "Climate+";
-        clientPrice = 195;
-        impact = "- 1 roundtrip transatlantic flight<br>- Powering a home for 3 months<br>- Growing 12 trees for 10 years";
-        homeUsage = "roughly equal to a large home’s electricity for 2 months";
+      let plan = '';
+      let price = '';
+      if (co2Tonnes <= 0.025) {
+        plan = 'Lite';
+        price = '$2.50/month';
+      } else if (co2Tonnes <= 0.075) {
+        plan = 'Standard';
+        price = '$6.50/month';
+      } else if (co2Tonnes <= 0.15) {
+        plan = 'Power User';
+        price = '$11.50/month';
+      } else {
+        plan = 'Climate+ Plan';
+        price = '$19.50/month';
       }
 
-      document.getElementById('result').innerHTML =
-        `📊 Estimated annual usage: <strong>${totalKwh.toFixed(1)} kWh</strong><br>` +
-        `🌍 CO₂e: <strong>${(tonnes).toFixed(3)} tonnes/year</strong><br>` +
-        `⛽ Equivalent to <strong>${gasGallons.toFixed(1)} gallons of gasoline</strong><br>` +
-        `🏠 That's ${homeUsage} worth of electricity each month.<br><br>` +
-        `🪧 Suggested Plan: <strong>${tier}</strong><br>` +
-        `💰 Annual Subscription: <strong>$${clientPrice}</strong><br><br>` +
-        `🌱 Impact Equivalents:<br>${impact}`;
-    });
+      document.getElementById('output').innerHTML = `
+        📊 <strong>Estimated monthly usage:</strong> ${totalKwh.toFixed(1)} kWh<br>
+        🌍 <strong>CO₂e:</strong> ${co2Tonnes} tonnes/month<br>
+        ⛽ <strong>Equivalent to:</strong> ${gasGallons} gallons of gasoline<br>
+        🏠 <strong>Equivalent energy use:</strong> ${homeEquiv} home(s) powered<br>
+        🧾 <strong>Suggested Plan:</strong> ${plan}<br>
+        💰 <strong>Monthly Subscription:</strong> ${price}<br>
+        <br>
+        🌿 <strong>Impact Equivalents:</strong><br>
+        - Driving ~${(co2 / 0.404).toFixed(0)} miles<br>
+        - Charging ${(totalKwh / 0.005).toLocaleString()} smartphones<br>
+        - Growing ${(co2Tonnes / 0.01).toFixed(1)} trees for 1 year
+      `;
+    }
   </script>
 </body>
 </html>
