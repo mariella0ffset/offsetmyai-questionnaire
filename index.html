@@ -70,14 +70,31 @@
       const cost = tonnes * 20;
 
       let tier = "Lite";
-      if (tonnes > 0.75) tier = "Power User";
-      else if (tonnes > 0.25) tier = "Standard";
+      let clientPrice = 25;
+      let gasGallons = tonnes * 1000 / 8.89;
+      let impact = "- Driving ~650 miles<br>- Charging 30,000 smartphones<br>- Growing 1 tree for 10 years";
+
+      if (tonnes > 0.75 && tonnes <= 1.5) {
+        tier = "Power User";
+        clientPrice = 115;
+        impact = "- One-way flight to London<br>- Driving ~4,000 miles<br>- Charging 180,000 smartphones";
+      } else if (tonnes > 0.25 && tonnes <= 0.75) {
+        tier = "Standard";
+        clientPrice = 65;
+        impact = "- 1 roundtrip flight NYC ↔ Chicago<br>- Driving ~2,000 miles<br>- Growing 3 trees for 10 years";
+      } else if (tonnes > 1.5) {
+        tier = "Climate+";
+        clientPrice = 195;
+        impact = "- 1 roundtrip transatlantic flight<br>- Powering a home for 3 months<br>- Growing 12 trees for 10 years";
+      }
 
       document.getElementById('result').innerHTML =
         `📊 Estimated monthly usage: <strong>${totalKwh.toFixed(1)} kWh</strong><br>` +
-        `🌍 CO₂e: <strong>${tonnes.toFixed(3)} tonnes</strong><br>` +
-        `💵 Offset cost (@ $20/tonne): <strong>$${cost.toFixed(2)}</strong><br><br>` +
-        `🪧 Suggested Plan: <strong>${tier} Offset</strong>`;
+        `🌍 CO₂e: <strong>${tonnes.toFixed(3)} tonnes/year</strong><br>` +
+        `⛽ Equivalent to <strong>${gasGallons.toFixed(1)} gallons of gasoline</strong><br><br>` +
+        `🪧 Suggested Plan: <strong>${tier}</strong><br>` +
+        `💰 Annual Subscription: <strong>$${clientPrice}</strong><br><br>` +
+        `🌱 Impact Equivalents:<br>${impact}`;
     });
   </script>
 </body>
